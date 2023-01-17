@@ -16,7 +16,7 @@ const Login = () => {
         e.preventDefault()
         const correo = e.target.email.value;
         const contraseña = e.target.contraseña.value;
-
+         // nuevo
         if (registro){
             await createUserWithEmailAndPassword(auth,correo,contraseña)
         }
