@@ -12,9 +12,11 @@ const Home = ({correoUsuario}) => {
 
 
     const valorInicial ={
+        cedula: '',
         nombre: '',
-        edad: '',
-        profesion: ''
+        ciudad: '',
+        direccion: '',
+        incidente: ''
     }
 
     const [user, setUser]= useState(valorInicial)
@@ -26,10 +28,11 @@ const Home = ({correoUsuario}) => {
 
     const guardarDatos = async(e)=>{
         e.preventDefault();
+        console.log(user)
         try {
-            await addDoc(collection(db,'usuarios', {
+            await addDoc(collection(db,'usuarios'), {
                 ...user
-            }))
+            })
         } catch (error) {
             console.log(error)
         }
@@ -51,12 +54,16 @@ const Home = ({correoUsuario}) => {
                     <form onSubmit={guardarDatos}>
                         <div className="card card-body">
                             <div className="form-group">
-                                <input type="text" name= 'nombre' className= 'form-control mb-3' placeholder = 'ingresar el nombre del usuario'
+                                <input type="text" name= 'cedula' className= 'form-control mb-3' placeholder = 'Ingrese su cédula'
+                                onChange={capturarInputs} value={user.cedula}/>
+                                <input type="text" name= 'nombre' className= 'form-control mb-3' placeholder = 'Ingrese su nombre completo'
                                 onChange={capturarInputs} value={user.nombre}/>
-                                <input type="text" name= 'edad' className= 'form-control mb-3' placeholder = 'ingresar la edad'
-                                onChange={capturarInputs} value={user.edad}/>
-                                <input type="text" name= 'profesion' className= 'form-control mb-3' placeholder = 'ingresa la profesion'
-                                onChange={capturarInputs} value={user.profesion}/>
+                                 <input type="text" name= 'ciudad' className= 'form-control mb-3' placeholder = 'Ingrese la ciudad del incidente'
+                                onChange={capturarInputs} value={user.ciudad}/>
+                                <input type="text" name= 'direccion' className= 'form-control mb-3' placeholder = 'Ingresa la direccion del incidente'
+                                onChange={capturarInputs} value={user.direccion}/>
+                                <textarea  name= 'incidente' className= 'form-control mb-3' placeholder = 'Describa el incidente'
+                                onChange={capturarInputs} value={user.incidente}/>
                             </div>
                             <button className="btn btn-primary">
                                 Guardar
