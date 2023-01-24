@@ -1,8 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import appFirebase from "../credenciales"
 import{getAuth, signOut} from 'firebase/auth'
 import{getFirestore, collection, addDoc, getDocs,doc,deleteDoc, getDoc, setDoc} from 'firebase/firestore'
+
+
+
+
 
 
 
@@ -21,6 +25,9 @@ const Home = ({correoUsuario}) => {
 
     const [user, setUser]= useState(valorInicial)
 
+    const [lista, setLista] = useState([])
+    const [subId, setSubId] = useState('')
+
     const capturarInputs = (e) =>{
         const {name,value} = e.target;
         setUser({...user,[name]:value})
@@ -28,24 +35,81 @@ const Home = ({correoUsuario}) => {
 
     const guardarDatos = async(e)=>{
         e.preventDefault();
-        console.log(user)
-        try {
-            await addDoc(collection(db,'usuarios'), {
+        if (subId === ''){
+            try {
+                await addDoc(collection(db,'usuarios'), {
+                    ...user
+                })
+            } catch (error) {
+                console.log(error)
+            }
+        } 
+        else{
+            await setDoc(doc(db, "usuarios", subId),{
                 ...user
             })
+        } 
+        
+        setUser({...valorInicial})
+        setSubId('')
+    }
+
+    //funcion para renderizar la lista de usuarios
+
+    useEffect(()=>{
+        const getLista = async()=>{
+            try {
+                const querySnapshot = await getDocs(collection(db,'usuarios'))
+                const docs = []
+                querySnapshot.forEach((doc)=>{
+                    docs.push({...doc.data(), id:doc.id})
+                })
+                setLista(docs)
+                
+            } catch (error) {
+                console.log(error)
+                
+            }
+        }
+
+        getLista()
+
+    },[lista])
+
+    // funcion para eliminar usuarios
+
+    const deleteUser = async(id) =>{
+        await deleteDoc(doc(db, "usuarios", id))
+    }
+
+    const getOne = async(id)=>{
+        try {
+            const docRef = doc(db, "usuarios", id)
+            const docSnap = await getDoc(docRef)
+            setUser(docSnap.data())
         } catch (error) {
             console.log(error)
         }
-        setUser({...valorInicial})
+
     }
+    useEffect(()=>{
+        if(subId !== ''){
+            getOne(subId)
+        }
+
+    },[subId])
+
+
+  
+
     return(
-        <div className="container">
+        <div className="container1" >
          <p>Bienvenido, <strong>{correoUsuario}</strong> Haz iniciado sesión</p>
             <button className="btn btn-primary" onClick ={()=>signOut(auth)}>
                 Cerrar sesión
             </button>
 
-            <hr/>
+            <hr className="linea"/>
 
 
             <div className = 'row'>
@@ -66,7 +130,7 @@ const Home = ({correoUsuario}) => {
                                 onChange={capturarInputs} value={user.incidente}/>
                             </div>
                             <button className="btn btn-primary">
-                                Guardar
+                               {subId === '' ? 'Guardar':'Actualizar'}
                             </button>
                         </div>
                     </form>
@@ -74,6 +138,32 @@ const Home = ({correoUsuario}) => {
                 </div>
                 <div className="col-md-8">
                     <h2 className='text-center mb-5'>Lista de usuarios</h2>
+                    <div className='container card'>
+                        <div className= 'card-body'>
+                            {
+                                lista.map(list =>(
+                                    <div key={list.id}>
+                                        <p>Cédula: {list.cedula}</p>
+                                        <p>Nombre: {list.nombre}</p>
+                                        <p>Ciudad: {list.ciudad}</p>
+                                        <p>Direccion: {list.direccion}</p>
+                                        <p>Incidente: {list.incidente}</p>
+
+                                        <button className="btn btn-danger" onClick={()=>deleteUser(list.id)}>
+                                            Eliminar
+                                        </button>
+                                        <button className="btn btn-success m-1" onClick={()=>setSubId(list.id)}>
+                                            Actualizar
+                                        </button>
+                                        <hr />
+
+
+                                    </div>
+                                ))
+                            }
+
+                        </div>
+                    </div>
 
                 </div>
               
