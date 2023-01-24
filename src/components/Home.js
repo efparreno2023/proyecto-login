@@ -6,10 +6,6 @@ import{getFirestore, collection, addDoc, getDocs,doc,deleteDoc, getDoc, setDoc} 
 
 
 
-
-
-
-
 const auth = getAuth(appFirebase)
 const db = getFirestore(appFirebase)
 const Home = ({correoUsuario}) => {
@@ -40,6 +36,7 @@ const Home = ({correoUsuario}) => {
                 await addDoc(collection(db,'usuarios'), {
                     ...user
                 })
+                getLista()
             } catch (error) {
                 console.log(error)
             }
@@ -48,6 +45,7 @@ const Home = ({correoUsuario}) => {
             await setDoc(doc(db, "usuarios", subId),{
                 ...user
             })
+            getLista()
         } 
         
         setUser({...valorInicial})
@@ -57,24 +55,34 @@ const Home = ({correoUsuario}) => {
     //funcion para renderizar la lista de usuarios
 
     useEffect(()=>{
-        const getLista = async()=>{
-            try {
-                const querySnapshot = await getDocs(collection(db,'usuarios'))
-                const docs = []
-                querySnapshot.forEach((doc)=>{
-                    docs.push({...doc.data(), id:doc.id})
-                })
-                setLista(docs)
-                
-            } catch (error) {
-                console.log(error)
-                
-            }
+        
+        if (lista.length === 0){
+            getLista()
         }
 
-        getLista()
 
     },[lista])
+
+
+    const getLista = async()=>{
+        try {
+            const querySnapshot = await getDocs(collection(db,'usuarios'))
+            const docs = []
+            querySnapshot.forEach((doc)=>{
+                docs.push({...doc.data(), id:doc.id})
+            })
+            console.log('recuperadatos')
+            setLista(docs)
+            
+            
+        } catch (error) {
+            console.log(error)
+            
+        }
+
+        
+    }
+
 
     // funcion para eliminar usuarios
 
@@ -103,7 +111,7 @@ const Home = ({correoUsuario}) => {
   
 
     return(
-        <div className="container1" >
+        <div className="container" >
          <p>Bienvenido, <strong>{correoUsuario}</strong> Haz iniciado sesión</p>
             <button className="btn btn-primary" onClick ={()=>signOut(auth)}>
                 Cerrar sesión
@@ -143,11 +151,12 @@ const Home = ({correoUsuario}) => {
                             {
                                 lista.map(list =>(
                                     <div key={list.id}>
-                                        <p>Cédula: {list.cedula}</p>
+                                        <p>Cedula: {list.cedula}</p>
                                         <p>Nombre: {list.nombre}</p>
                                         <p>Ciudad: {list.ciudad}</p>
                                         <p>Direccion: {list.direccion}</p>
                                         <p>Incidente: {list.incidente}</p>
+
 
                                         <button className="btn btn-danger" onClick={()=>deleteUser(list.id)}>
                                             Eliminar
